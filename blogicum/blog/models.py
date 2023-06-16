@@ -55,6 +55,7 @@ class Post(PublishedAndCreatedModel):
                                  on_delete=models.SET_NULL,
                                  null=True,
                                  verbose_name='Категория')
+    image = models.ImageField('Фото', upload_to='post_images', blank=True)
 
     class Meta:
         verbose_name = 'публикация'
@@ -63,3 +64,19 @@ class Post(PublishedAndCreatedModel):
 
     def __str__(self):
         return self.title
+
+
+class Comment(models.Model):
+    text = models.TextField('Комментарий')
+    post = models.ForeignKey(Post, 
+                             on_delete=models.CASCADE,
+                             related_name='comment')
+    created_at = models.DateTimeField(auto_now_add=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ('created_at',)
+    
+
+
+
