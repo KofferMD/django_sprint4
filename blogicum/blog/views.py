@@ -144,7 +144,11 @@ class CategoryListView(ListView):
         self.category = get_object_or_404(Category,
                                           slug=self.kwargs["category_slug"])
         return (
-            Post.objects.filter(category=self.category)
+            Post.objects.filter(category=self.category,
+                                pub_date__lt=dt.datetime.now(),
+                                category__is_published=True,
+                                is_published=True,
+                                )
             .annotate(comment_count=Count("comment"))
             .all()
         )
