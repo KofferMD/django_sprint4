@@ -68,7 +68,7 @@ class Post(PublishedAndCreatedModel):
 
 class Comment(models.Model):
     text = models.TextField('Комментарий')
-    post = models.ForeignKey(Post, 
+    post = models.ForeignKey(Post,
                              on_delete=models.CASCADE,
                              related_name='comment')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -76,7 +76,3 @@ class Comment(models.Model):
 
     class Meta:
         ordering = ('created_at',)
-    
-
-
-

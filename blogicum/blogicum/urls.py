@@ -15,9 +15,7 @@ urlpatterns = [
         template_name='registration/registration_form.html',
         form_class=UserCreationForm,
         success_url=reverse_lazy('blog:post_list'),
-    ),
-         name='registration'
-         ),
+    ), name='registration'),
     path('admin/', admin.site.urls),
 ]
 
