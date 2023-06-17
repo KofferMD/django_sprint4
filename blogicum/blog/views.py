@@ -3,7 +3,7 @@ from typing import Any, Dict
 from django.db.models.query import QuerySet
 from django.db.models import Count
 from django.forms.models import BaseModelForm
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import (
     ListView,
@@ -12,7 +12,7 @@ from django.views.generic import (
     DeleteView,
     DetailView,
 )
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from blog.models import Post, Category, Comment
 from blog.models import User
 from blog.form import PostForm, CommentForm
@@ -62,20 +62,23 @@ class PostDetailView(DetailView):
         return context
 
 
-class PostUpdateView(LoginRequiredMixin, UpdateView):
+class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
     form_class = PostForm
 
-    def dispatch(self, request, *args, **kwargs):
-        get_object_or_404(Post, pk=kwargs["pk"], author=request.user)
-        return super().dispatch(request, *args, **kwargs)
+    def check_edit(self):
+        post = self.get_object()
+        return self.request.user == post.author
 
-    def get_success_url(self):
-        return reverse("blog:post_detail", kwargs={"pk": self.object.pk})
+    def handle_no_permission(self):
+        return redirect('blog:post_detail', pk=self.kwargs['pk'])
 
     def form_valid(self, form):
         form.instance.author = self.request.user
         return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse("blog:post_detail", kwargs={"pk": self.object.pk})
 
 
 class PostDeleteView(LoginRequiredMixin, DeleteView):
