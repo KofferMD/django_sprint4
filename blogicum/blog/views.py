@@ -179,7 +179,6 @@ class ProfileView(ListView):
             Post.objects.prefetch_related("author", "category", "location")
             .filter(
                 author=self.author,
-                pub_date__lt=dt.datetime.now(),
             )
             .annotate(comment_count=Count("comment"))
             .order_by("-pub_date")
