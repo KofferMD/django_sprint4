@@ -103,8 +103,7 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-LOGIN_REDIRECT_URL = 'blog:post_list' 
+LOGIN_REDIRECT_URL = 'blog:post_list'
 LOGIN_URL = 'login'
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'

@@ -140,9 +140,16 @@ class CategoryListView(ListView):
     context_object_name = "page_obj"
     paginate_by = 10
 
+    def dispatch(self, request, *args, **kwargs):
+        self.category = get_object_or_404(Category,
+                                          slug=self.kwargs['category_slug'],
+                                          is_published=True)
+        return super().dispatch(request, *args, **kwargs)
+
     def get_queryset(self) -> QuerySet[Any]:
         self.category = get_object_or_404(Category,
-                                          slug=self.kwargs["category_slug"])
+                                          slug=self.kwargs["category_slug"],
+                                          is_published=True)
         return (
             Post.objects.filter(category=self.category,
                                 pub_date__lt=dt.datetime.now(),
@@ -164,22 +171,24 @@ class ProfileView(ListView):
     template_name = "blog/profile.html"
     context_object_name = "page_obj"
     paginate_by = 10
+    ordering = "-pub_date"
 
     def get_queryset(self):
-        self.user = get_object_or_404(User, username=self.kwargs["username"])
+        self.author = get_object_or_404(User, username=self.kwargs['username'])
         return (
             Post.objects.prefetch_related("author", "category", "location")
             .filter(
-                author=self.user,
+                author=self.author,
                 pub_date__lt=dt.datetime.now(),
             )
             .annotate(comment_count=Count("comment"))
+            .order_by("-pub_date")
             .all()
         )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["profile"] = self.user
+        context["profile"] = self.author
         return context
 
 
