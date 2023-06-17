@@ -28,10 +28,10 @@ class PostListView(ListView):
             category__is_published=True,
         )
         .annotate(comment_count=Count("comment"))
+        .order_by("-pub_date")
         .all()
     )
     paginate_by = 10
-    ordering = "-pub_date"
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -58,7 +58,6 @@ class PostDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context["form"] = CommentForm
         context["comments"] = self.object.comment.select_related("author")
-
         return context
 
 
@@ -66,7 +65,7 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
     form_class = PostForm
 
-    def check_edit(self):
+    def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
 
