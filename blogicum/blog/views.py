@@ -4,6 +4,7 @@ from typing import Any, Dict
 from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
 from django.db.models import Count
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import (
@@ -93,7 +94,8 @@ class PostUpdateView(LoginRequiredMixin, UpdateView):
     def dispatch(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.author != request.user:
-            raise PermissionDenied
+            return HttpResponseRedirect(reverse('blog:post_detail',
+                                                kwargs={'pk': instance.pk}))
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
