@@ -17,8 +17,26 @@ from blog.models import User
 from blog.form import PostForm, CommentForm
 
 
-class PostListView(ListView):
+class PostMixin:
     model = Post
+    paginate_by = 10
+
+
+class CommentMixin:
+    model = Comment
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(
+            Comment, pk=self.kwargs["comment_pk"],
+            post_id=self.kwargs["post_pk"]
+        )
+
+    def get_success_url(self):
+        return reverse_lazy("blog:post_detail",
+                            kwargs={"pk": self.kwargs["post_pk"]})
+
+
+class PostListView(PostMixin, ListView):
     queryset = (
         Post.objects.prefetch_related("author", "category", "location")
         .filter(
@@ -30,7 +48,6 @@ class PostListView(ListView):
         .order_by("-pub_date")
         .all()
     )
-    paginate_by = 10
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -40,8 +57,6 @@ class PostListView(ListView):
 class PostCreateView(CreateView, LoginRequiredMixin):
     model = Post
     form_class = PostForm
-
-    # template_name = "blog/post_form.html"
 
     def form_valid(self, form):
         form.instance.author = self.request.user
@@ -106,39 +121,17 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
         return reverse("blog:post_detail", kwargs={"pk": self.post_object.pk})
 
 
-class CommentUpdateView(UpdateView, LoginRequiredMixin):
-    model = Comment
+class CommentUpdateView(CommentMixin, LoginRequiredMixin, UpdateView):
     fields = ["text"]
 
-    def get_object(self, queryset=None):
-        return get_object_or_404(Comment, pk=self.kwargs["comment_pk"],
-                                 post_id=self.kwargs["post_pk"])
 
-    def get_success_url(self):
-        return reverse_lazy("blog:post_detail",
-                            kwargs={"pk": self.kwargs["post_pk"]})
-
-
-class CommentDeleteView(DeleteView, LoginRequiredMixin):
-    model = Comment
+class CommentDeleteView(CommentMixin, LoginRequiredMixin, DeleteView):
     template_name = "blog/comment_form.html"
 
-    def get_object(self, queryset=None):
-        return get_object_or_404(
-            Comment, pk=self.kwargs["comment_pk"],
-            post_id=self.kwargs["post_pk"]
-        )
 
-    def get_success_url(self):
-        return reverse_lazy("blog:post_detail",
-                            kwargs={"pk": self.kwargs["post_pk"]})
-
-
-class CategoryListView(ListView):
-    model = Post
+class CategoryListView(PostMixin, ListView):
     template_name = "blog/category.html"
     context_object_name = "page_obj"
-    paginate_by = 10
 
     def dispatch(self, request, *args, **kwargs):
         self.category = get_object_or_404(Category,
@@ -167,11 +160,9 @@ class CategoryListView(ListView):
         return context
 
 
-class ProfileView(ListView):
-    model = Post
+class ProfileView(PostMixin, ListView):
     template_name = "blog/profile.html"
     context_object_name = "page_obj"
-    paginate_by = 10
     ordering = "-pub_date"
 
     def get_queryset(self):
