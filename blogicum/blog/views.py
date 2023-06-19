@@ -1,5 +1,7 @@
 import datetime as dt
 from typing import Any, Dict
+
+from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
 from django.db.models import Count
 from django.forms.models import BaseModelForm
@@ -39,10 +41,12 @@ class PostListView(ListView):
 
 
 class PostCreateView(CreateView, LoginRequiredMixin):
+    model = Post
     form_class = PostForm
-    template_name = "blog/post_form.html"
 
-    def form_valid(self, form: BaseModelForm):
+    # template_name = "blog/post_form.html"
+
+    def form_valid(self, form):
         form.instance.author = self.request.user
         return super().form_valid(form)
 
