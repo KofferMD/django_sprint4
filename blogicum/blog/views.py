@@ -159,6 +159,7 @@ class CategoryListView(ListView):
                                 is_published=True,
                                 )
             .annotate(comment_count=Count("comment"))
+            .order_by("-pub_date")
             .all()
         )
 
