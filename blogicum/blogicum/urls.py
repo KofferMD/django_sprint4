@@ -4,11 +4,10 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.views.generic.edit import CreateView
 from django.contrib.auth.forms import UserCreationForm
-from core.views import page_not_found, internal_server_error
 
 
-handler404 = page_not_found
-handler500 = internal_server_error
+handler404 = 'core.views.page_not_found'
+handler500 = 'core.views.internal_server_error'
 
 urlpatterns = [
     path('', include('blog.urls', namespace='blog')),

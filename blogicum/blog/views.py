@@ -38,7 +38,7 @@ class PostListView(ListView):
         return context
 
 
-class PostCreateView(LoginRequiredMixin, CreateView):
+class PostCreateView(CreateView, LoginRequiredMixin):
     form_class = PostForm
     template_name = "blog/post_form.html"
 
@@ -56,7 +56,7 @@ class PostDetailView(DetailView):
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        context["form"] = CommentForm
+        context["form"] = CommentForm()
         context["comments"] = self.object.comment.select_related("author")
         return context
 
@@ -75,9 +75,6 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def form_valid(self, form):
         form.instance.author = self.request.user
         return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse("blog:post_detail", kwargs={"pk": self.object.pk})
 
 
 class PostDeleteView(LoginRequiredMixin, DeleteView):
@@ -108,7 +105,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
         return reverse("blog:post_detail", kwargs={"pk": self.post_object.pk})
 
 
-class CommentUpdateView(LoginRequiredMixin, UpdateView):
+class CommentUpdateView(UpdateView, LoginRequiredMixin):
     model = Comment
     fields = ["text"]
 
@@ -121,7 +118,7 @@ class CommentUpdateView(LoginRequiredMixin, UpdateView):
                             kwargs={"pk": self.kwargs["post_pk"]})
 
 
-class CommentDeleteView(LoginRequiredMixin, DeleteView):
+class CommentDeleteView(DeleteView, LoginRequiredMixin):
     model = Comment
     template_name = "blog/comment_form.html"
 
