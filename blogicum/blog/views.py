@@ -1,5 +1,7 @@
 import datetime as dt
 from typing import Any, Dict
+
+from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect
@@ -24,12 +26,19 @@ class PostMixin:
 
 class CommentMixin:
     model = Comment
+    form_class = CommentForm
 
     def get_object(self, queryset=None):
         return get_object_or_404(
             Comment, pk=self.kwargs["comment_pk"],
             post_id=self.kwargs["post_pk"]
         )
+
+    def dispatch(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.author != request.user:
+            raise PermissionDenied
+        return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
         return reverse_lazy("blog:post_detail",
@@ -54,7 +63,7 @@ class PostListView(PostMixin, ListView):
         return context
 
 
-class PostCreateView(CreateView, LoginRequiredMixin):
+class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     form_class = PostForm
 
@@ -77,16 +86,15 @@ class PostDetailView(DetailView):
         return context
 
 
-class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class PostUpdateView(LoginRequiredMixin, UpdateView):
     model = Post
     form_class = PostForm
 
-    def test_func(self):
-        post = self.get_object()
-        return self.request.user == post.author
-
-    def handle_no_permission(self):
-        return redirect('blog:post_detail', pk=self.kwargs['pk'])
+    def dispatch(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.author != request.user:
+            raise PermissionDenied
+        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         form.instance.author = self.request.user
@@ -96,10 +104,13 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 class PostDeleteView(LoginRequiredMixin, DeleteView):
     model = Post
     form_class = PostForm
+    template_name = "blog/post_form.html"
     success_url = reverse_lazy("blog:post_list")
 
     def dispatch(self, request, *args, **kwargs):
-        get_object_or_404(Post, pk=kwargs["pk"], author=request.user)
+        instance = self.get_object()
+        if instance.author != request.user:
+            raise PermissionDenied
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -122,7 +133,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
 
 
 class CommentUpdateView(CommentMixin, LoginRequiredMixin, UpdateView):
-    fields = ["text"]
+    pass
 
 
 class CommentDeleteView(CommentMixin, LoginRequiredMixin, DeleteView):
