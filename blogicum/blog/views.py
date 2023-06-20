@@ -5,7 +5,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
 from django.db.models import Count
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.views.generic import (
     ListView,
@@ -14,7 +14,7 @@ from django.views.generic import (
     DeleteView,
     DetailView,
 )
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from blog.models import Post, Category, Comment
 from blog.models import User
 from blog.form import PostForm, CommentForm
