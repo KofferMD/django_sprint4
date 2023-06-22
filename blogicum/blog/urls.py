@@ -6,6 +6,10 @@ app_name: str = 'blog'
 urlpatterns = [
     path('',
          views.PostListView.as_view(),
+         name='index'),
+
+    path('posts/',
+         views.PostListView.as_view(),
          name='post_list'),
 
     path('posts/<int:pk>/',
