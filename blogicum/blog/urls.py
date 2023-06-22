@@ -8,6 +8,10 @@ urlpatterns = [
          views.PostListView.as_view(),
          name='post_list'),
 
+     path('posts/<int:pk>/',
+         views.PostDetailView.as_view(),
+         name='post_detail'),
+
     path('profile/<str:username>/',
          views.ProfileView.as_view(),
          name='profile'),
@@ -19,10 +23,6 @@ urlpatterns = [
     path('posts/create/',
          views.PostCreateView.as_view(),
          name='create_post'),
-
-    path('posts/<int:pk>/',
-         views.PostDetailView.as_view(),
-         name='post_detail'),
 
     path('posts/<int:pk>/edit/',
          views.PostUpdateView.as_view(),
