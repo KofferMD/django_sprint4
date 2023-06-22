@@ -8,7 +8,7 @@ urlpatterns = [
          views.PostListView.as_view(),
          name='post_list'),
 
-     path('posts/<int:pk>/',
+    path('posts/<int:pk>/',
          views.PostDetailView.as_view(),
          name='post_detail'),
 
