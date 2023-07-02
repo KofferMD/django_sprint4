@@ -48,27 +48,15 @@ class CommentMixin:
 
 class PostListView(PostMixin, ListView):
     def get_queryset(self):
-        # posts = Post.objects.filter(
-        #     pub_date__lt=dt.datetime.now(),
-        #     is_published=True,
-        #     category__is_published=True,
-        # ).select_related(
-        #     "author", "category"
-        # ).prefetch_related(
-        #     "location"
-        # ).annotate(
-        #     comment_count=Count("comment")
-        # )
-
         posts = Post.objects.prefetch_related(
-            "author", "category", "location"
-            ).filter(
-                pub_date__lt=dt.datetime.now(),
-                is_published=True,
-                category__is_published=True,
-            ).annotate(
-                comment_count=Count("comment")
-            ).order_by("-pub_date")
+                    "author", "category", "location"
+                ).filter(
+                    pub_date__lt=dt.datetime.now(),
+                    is_published=True,
+                    category__is_published=True,
+                ).annotate(
+                    comment_count=Count("comment")
+                ).order_by("-pub_date")
         return posts
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
