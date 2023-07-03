@@ -82,7 +82,7 @@ class PostDetailView(DetailView):
 
     def dispatch(self, request, *args, **kwargs):
         instance = self.get_object()
-        if instance.author != request.user and instance.is_published == False:
+        if instance.author != request.user and not instance.is_published:
             return render(request, 'pages/404.html', status=404)
         return super().dispatch(request, *args, **kwargs)
 
