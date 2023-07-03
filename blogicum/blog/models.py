@@ -28,7 +28,7 @@ class Category(PublishedAndCreatedModel):
                             help_text=('Идентификатор страницы для URL; '
                                        'разрешены символы латиницы, цифры, '
                                        'дефис и подчёркивание.'))
-
+    
     class Meta:
         verbose_name = 'категория'
         verbose_name_plural = 'Категории'
