@@ -3,6 +3,7 @@ from typing import Any, Dict
 
 from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
+from django.utils import timezone
 from django.db.models import Count
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
@@ -85,7 +86,9 @@ class PostDetailView(DetailView):
 
         if (instance.author != request.user and not instance.is_published
                 or (instance.author != request.user and instance.category
-                    and not instance.category.is_published)):
+                    and not instance.category.is_published)
+                or (instance.author != request.user
+                    and instance.pub_date > timezone.now())):
             return render(request, 'pages/404.html', status=404)
         return super().dispatch(request, *args, **kwargs)
 
