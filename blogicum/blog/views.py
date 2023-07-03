@@ -5,7 +5,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
 from django.db.models import Count
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy, reverse
 from django.views.generic import (
     ListView,
@@ -79,6 +79,12 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
 class PostDetailView(DetailView):
     model = Post
+
+    def dispatch(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.author != request.user and instance.is_published == False:
+            return render(request, 'pages/404.html', status=404)
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
