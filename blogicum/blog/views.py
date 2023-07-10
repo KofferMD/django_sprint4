@@ -3,9 +3,10 @@ from typing import Any, Dict
 
 from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
+from django.utils import timezone
 from django.db.models import Count
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy, reverse
 from django.views.generic import (
     ListView,
@@ -47,17 +48,17 @@ class CommentMixin:
 
 
 class PostListView(PostMixin, ListView):
-    queryset = (
-        Post.objects.prefetch_related("author", "category", "location")
-        .filter(
+    def get_queryset(self):
+        posts = Post.objects.prefetch_related(
+            "author", "category", "location"
+        ).filter(
             pub_date__lt=dt.datetime.now(),
             is_published=True,
             category__is_published=True,
-        )
-        .annotate(comment_count=Count("comment"))
-        .order_by("-pub_date")
-        .all()
-    )
+        ).annotate(
+            comment_count=Count("comment")
+        ).order_by("-pub_date")
+        return posts
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -79,6 +80,17 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
 class PostDetailView(DetailView):
     model = Post
+
+    def dispatch(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        if (instance.author != request.user and not instance.is_published
+                or (instance.author != request.user and instance.category
+                    and not instance.category.is_published)
+                or (instance.author != request.user
+                    and instance.pub_date > timezone.now())):
+            return render(request, 'pages/404.html', status=404)
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
