@@ -49,7 +49,6 @@ class CategoryAdmin(admin.ModelAdmin):
     search_fields = ('title',)
 
 
-
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
     list_display = (
