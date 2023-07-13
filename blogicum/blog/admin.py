@@ -69,7 +69,7 @@ class CommentAdmin(admin.ModelAdmin):
     list_display = (
         'text',
         'post',
-        'author'
+        'author',
     )
 
     list_filter = ('post',)

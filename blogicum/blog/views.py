@@ -85,10 +85,9 @@ class PostDetailView(DetailView):
         instance = self.get_object()
         variable_author = instance.author != request.user
 
-        if (variable_author and not instance.is_published
-                or (variable_author and instance.category
-                    and not instance.category.is_published)
-                or (variable_author and instance.pub_date > timezone.now())):
+        if variable_author and (not instance.is_published or (
+                instance.category and not instance.category.is_published)
+                                or instance.pub_date > timezone.now()):
             return render(request, 'pages/404.html', status=404)
         return super().dispatch(request, *args, **kwargs)
 
